@@ -1,4 +1,4 @@
-name: atlantis-image
+name: mutator-image
 
 on:
   push:
