@@ -3,7 +3,7 @@ package patch_test
 import (
 	"testing"
 
-	"github.com/jukie/k8s-secret-injector/patch"
+	"github.com/jukie/k8s-secret-injector/cmd/patch"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	admissionv1 "k8s.io/api/admission/v1"

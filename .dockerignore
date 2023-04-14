@@ -1,3 +1,5 @@
+deploy
+chart
 k8s-secret-injector
 tmp/**
 **/*.bk

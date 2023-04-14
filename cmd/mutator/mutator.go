@@ -7,7 +7,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/jukie/k8s-secret-injector/patch"
+	"github.com/jukie/k8s-secret-injector/cmd/logger"
+	"github.com/jukie/k8s-secret-injector/cmd/patch"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	admissionv1 "k8s.io/api/admission/v1"
@@ -17,7 +18,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	klog "k8s.io/klog/v2"
 )
 
 type Mutator struct {
@@ -30,7 +30,7 @@ type Mutator struct {
 func NewController(imagePullSecretName, registry string) *Mutator {
 	clientset, err := newClient()
 	if err != nil {
-		klog.Fatalln(err)
+		logger.Log.Fatal(err.Error())
 	}
 
 	c := &Mutator{
@@ -91,21 +91,21 @@ func (c *Mutator) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	pod, err := c.getPodFromAdmissionRequest(&rev)
 	if err != nil {
 		e := fmt.Sprintf("Failed to unmarshal AdmissionReview: %v", err)
-		klog.Errorln(e)
+		logger.Log.Error(e)
 		http.Error(w, e, http.StatusBadRequest)
 		return
 	}
 
 	if rev, err = patch.PodMutator(rev, pod, c.ImagePullSecretName, c.Registry); err != nil {
 		e := fmt.Sprintf("Failed to mutate pod: %v", err)
-		klog.Errorln(e)
+		logger.Log.Error(e)
 		http.Error(w, e, http.StatusBadRequest)
 		return
 	}
 
 	if err := writeResponse(w, rev); err != nil {
 		e := fmt.Sprintf("failed to write response: %v", err)
-		klog.Errorln(e)
+		logger.Log.Error(e)
 		http.Error(w, e, http.StatusInternalServerError)
 		return
 	}

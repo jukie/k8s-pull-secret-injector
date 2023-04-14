@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jukie/k8s-secret-injector/cmd/logger"
 	admissionv1 "k8s.io/api/admission/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/klog/v2"
 )
 
 type patchOperation struct {
@@ -73,7 +73,7 @@ func addImagePullSecretPatch(pod *v1.Pod, imagePullSecretName, registry string, 
 		break
 	}
 	if needsPatch {
-		klog.Infof("Patching imagePullSecret for Pod %s from Namespace %s", pod.Name, pod.Namespace)
+		logger.Log.Sugar().Infof("Patching imagePullSecret for Pod %s from Namespace %s", pod.Name, pod.Namespace)
 		imagePull := []v1.LocalObjectReference{{Name: imagePullSecretName}}
 		patch := []patchOperation{
 			{
