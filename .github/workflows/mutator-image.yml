@@ -19,9 +19,6 @@ concurrency:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        image_type: [alpine, debian]
     runs-on: ubuntu-22.04
     env:
       # Set docker repo to either the fork or the main repo where the branch exists
@@ -47,17 +44,9 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
-    # release version is the name of the tag i.e. v0.10.0
-    # release version also has the image type appended i.e. v0.10.0-alpine
-    # release tag is either pre-release or latest i.e. latest
-    # release tag also has the image type appended i.e. latest-alpine
-    # if it's v0.10.0 and alpine, it will do v0.10.0, v0.10.0-alpine, latest, latest-alpine
-    # if it's v0.10.0 and debian, it will do v0.10.0-debian, latest-debian
     - name: Docker meta
       id: meta
       uses: docker/metadata-action@v4
-      env:
-        SUFFIX: ${{ format('-{0}', matrix.image_type) }}
       with:
         images: |
           ${{ env.DOCKER_REPO }}
@@ -67,17 +56,13 @@ jobs:
         tags: |
           # semver
           type=semver,pattern={{version}},prefix=v,suffix=${{ env.SUFFIX }}
-          type=semver,pattern={{version}},prefix=v,enable=${{ matrix.image_type == 'alpine' }}
           type=semver,pattern={{major}}.{{minor}},prefix=v,suffix=${{ env.SUFFIX }}
           # dev
           type=raw,value=dev,suffix=${{ env.SUFFIX }}-{{ sha }}
-          type=raw,event=push,value=dev,enable=${{ github.ref == format('refs/heads/{0}', 'main') && matrix.image_type == 'alpine' }},suffix=
           type=raw,event=push,value=dev,enable={{is_default_branch}},suffix=${{ env.SUFFIX }}
           # prerelease
-          type=raw,event=tag,value=prerelease-latest,enable=${{ startsWith(github.ref, 'refs/tags/') && contains(github.ref, 'pre') && matrix.image_type == 'alpine' }},suffix=
           type=raw,event=tag,value=prerelease-latest,enable=${{ startsWith(github.ref, 'refs/tags/') && contains(github.ref, 'pre') }},suffix=${{ env.SUFFIX }}
           # latest
-          type=raw,event=tag,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') && !contains(github.ref, 'pre') && matrix.image_type == 'alpine' }},suffix=
           type=raw,event=tag,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') && !contains(github.ref, 'pre') }},suffix=${{ env.SUFFIX }}
           # pr
           type=ref,event=pr,suffix=${{ env.SUFFIX }}
@@ -108,6 +93,5 @@ jobs:
         platforms: linux/arm64/v8,linux/amd64,linux/arm/v7
         push: ${{ env.PUSH }}
         tags: ${{ steps.meta.outputs.tags }}
-        target: ${{ matrix.image_type }}
         labels: ${{ steps.meta.outputs.labels }}
         outputs: type=image,name=target,annotation-index.org.opencontainers.image.description=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.description'] }}
