@@ -90,7 +90,7 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
         context: .
-        platforms: linux/arm64/v8,linux/amd64,linux/arm/v7
+        platforms: linux/arm64/v8,linux/amd64
         push: ${{ env.PUSH }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
