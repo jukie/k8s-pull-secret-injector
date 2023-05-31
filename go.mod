@@ -3,7 +3,7 @@ module github.com/jukie/k8s-secret-injector
 go 1.20
 
 require (
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.24.0
 	k8s.io/api v0.27.1
 	k8s.io/apimachinery v0.27.1
